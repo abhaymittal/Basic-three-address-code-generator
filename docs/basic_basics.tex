@@ -1,0 +1,75 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage{color}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{%
+  a4paper,%
+  top=2.5cm,%
+  bottom=2.5cm,%
+  left=2.5cm,%
+  right=2.5cm%
+}
+
+% beginning documentclass
+
+\begin{document}
+ \title{\Huge \color{blue} QBasic Notes}
+ \author{Abhay Mittal}
+ \date{October 14th, 2014}
+ \maketitle
+ 
+ \pagebreak
+ 
+ \section{\color{red}Syntax of Commands}
+ \begin{tabular}{| l | l |}
+ \hline
+  \textbf{Command / Statement} & \textbf{Meaning} \\  \hline
+  PRINT & \begin{tabular}{l}This statement is used to print output on the screen \\
+  Note: To print more than one item, separate the items by using \\commas (,) and the items are separated by 
+  tabs in the output. \end{tabular} \\ \hline
+  END & Tells computer that the program has finished \\ \hline
+ \end{tabular}
+ 
+ \pagebreak
+ 
+ \section{\color{red}List of Operators}
+
+ \begin{tabular}{| l | l | l |}
+  \hline
+  \textbf{Operator} & \textbf{Meaning} & \textbf{Priority} \\  \hline
+  \^{} & Exponentiation & 1 \\  \hline
+  - & Negation. e.g. -23 & 2 \\  \hline
+  * & Multiply & 3 \\  \hline
+  / & Divide & 3 \\  \hline
+  + & Add & 4 \\  \hline
+  - & Subtract & 4 \\  \hline
+  ' & Comment & NA \\  \hline
+  
+ \end{tabular}
+ 
+ \section{\color{red}Some important points}
+ 
+ \begin{itemize}
+  \item Double quotes ('') are used to encapsulate a string. e.g. ``Hello World''
+  
+  \item Division of integers can produce floating quotient
+  
+  \item Qbasic makes the two meanings of minus signs less confusing by adjusting what we type.
+  \begin{enumerate}
+   \item When ``-'' means ``negative number'' it is placed right up against the number it is for.
+   \item When``-'' means ``subtraction'' it is separated from the numbers to be subtracted by one space on each side.
+  \end{enumerate}
+  (The adjustment is not done until after the cursor has left the line)
+  \\The details of this point can be read \href{http://chortle.ccsu.edu/QBasic/chapter01/bc01_19.html}{here}.
+  
+  \item Qbasic can handle floating point powers also (e.g. 10\^{}1.2).
+  \item All aritmetic operators are left associative (except exponentiation).
+  \item Same priority operators are processed from left to right except exponentiation.
+  
+ \end{itemize}
+
+
+
+
+\end{document}
