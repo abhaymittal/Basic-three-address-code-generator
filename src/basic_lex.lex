@@ -4,9 +4,11 @@
 	#include"y.tab.h"
 	void yyerror(char*);
 %}
+
 digit [0-9]
 letter [a-zA-Z]
 whitespace [ \t]
+
 %%
 {whitespace}+ ;
 {digit}+ 					{yylval.ival = atoi(yytext);return INTEGER;}
