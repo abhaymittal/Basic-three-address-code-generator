@@ -41,7 +41,7 @@ Output
 	| Output2 STRING_LITERAL	{printf("%s",$2);}
 	
 Output2
-	: Output ','
+	: Output ','				{printf("\t");} 
 	| Empty	
 /*PRINTING SECTION END*/
 
@@ -56,6 +56,7 @@ ArithmExpr
 	| '-' ArithmExpr %prec NEGATION	{$$=-1 * $2;}
 	| INTEGER					{$$=$1;}
 	| DOUBLE					{$$=$1;}
+	| '(' ArithmExpr ')'		{$$=$2;};
 /*ARITHMETIC SECTION END*/
 
 
