@@ -1,6 +1,7 @@
 %{
 	#include<stdio.h>
 	#include<stdlib.h>
+	#include<string.h>
 	#include"y.tab.h"
 	void yyerror(char*);
 %}
@@ -12,7 +13,8 @@ whitespace [ \t]
 %%
 {whitespace}+ ;
 {digit}+ 					{yylval.ival = atoi(yytext);return INTEGER;}
-{digit}+"."{digit}+ 			{yylval.dval=atof(yytext);return DOUBLE;}
+{digit}+"."{digit}+ 		{yylval.dval=atof(yytext);return DOUBLE;}
+\"[^\n]+\"					{strcpy(yylval.str,yytext);return STRING_LITERAL;}
 (P|p)(R|r)(I|i)(N|n)(T|t) 	{return PRINT;}
 [-+*^/]						{return *yytext;}	
 \n							;
