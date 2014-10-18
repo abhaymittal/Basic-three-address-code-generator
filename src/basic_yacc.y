@@ -5,7 +5,7 @@
 %}
 
 %start Program
-%union{int ival; double dval;}
+%union{int ival; double dval; char str[120];}
 
 /*Keywords*/
 %token PRINT END
@@ -13,6 +13,7 @@
 /*Data type tokens*/
 %token <ival> INTEGER
 %token <dval> DOUBLE
+%token <str> STRING_LITERAL
 
 /*Grammar's Variable(Non-terminal) types*/
 %type <dval> ArithmExpr
@@ -31,6 +32,7 @@ Program
 
 Line	
 	: PRINT ArithmExpr {int x=$2; if(x==$2) printf("%d\n",x); else printf("%f\n",$2);}
+	| PRINT STRING_LITERAL {printf("%s",$2);}
 	| END
 		
 ArithmExpr
