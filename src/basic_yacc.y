@@ -31,10 +31,22 @@ Program
 	| Line
 
 Line	
-	: PRINT ArithmExpr {int x=$2; if(x==$2) printf("%d\n",x); else printf("%f\n",$2);}
-	| PRINT STRING_LITERAL {printf("%s",$2);}
+	: PRINT Output				{printf("\n");}
 	| END
-		
+
+
+/*PRINTING SECTION BEGIN*/
+Output
+	: Output2 ArithmExpr		{int x=$2; if(x==$2) printf("%d",x); else printf("%f",$2);}
+	| Output2 STRING_LITERAL	{printf("%s",$2);}
+	
+Output2
+	: Output ','
+	| Empty	
+/*PRINTING SECTION END*/
+
+
+/*ARITHMETIC SECTION BEGIN*/
 ArithmExpr
 	: ArithmExpr '^' ArithmExpr	{$$=pow($1,$3);}
 	| ArithmExpr '*' ArithmExpr	{$$=$1*$3;}
@@ -44,7 +56,10 @@ ArithmExpr
 	| '-' ArithmExpr %prec NEGATION	{$$=-1 * $2;}
 	| INTEGER					{$$=$1;}
 	| DOUBLE					{$$=$1;}
-	
+/*ARITHMETIC SECTION END*/
+
+
+Empty:	; /*EPSILON*/
 
 %%
 
