@@ -19,6 +19,7 @@ whitespace [ \t]
 [-+*^,()/]					{return *yytext;}	
 \n							;
 (end) 						{return END;}
+{letter}({letter}|{digit}|".")+[#&$%] {printf("Variable found");return VARIABLE;}
 .							;
 %%	
 
