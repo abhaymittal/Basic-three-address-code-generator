@@ -14,12 +14,14 @@ whitespace [ \t]
 {whitespace}+ ;
 {digit}+ 					{yylval.ival = atoi(yytext);return INTEGER;}
 {digit}+"."{digit}+ 		{yylval.dval=atof(yytext);return DOUBLE;}
-\"([^\n\"]|\"\")*\"					{strcpy(yylval.str,yytext);return STRING_LITERAL;}
+\"([^\n\"]|\"\")*\"			{strcpy(yylval.str,yytext);return STRING_LITERAL;}
 (P|p)(R|r)(I|i)(N|n)(T|t) 	{return PRINT;}
-[-+*^,()/]					{return *yytext;}	
+[-+*^,()=/]					{return *yytext;}	
 \n							;
 (end) 						{return END;}
-{letter}({letter}|{digit}|".")+[#&$%] {printf("Variable found");return VARIABLE;}
+(let)						{return LET;}
+{letter}({letter}|{digit}|".")*[#&%]? {strcpy(yylval.str,yytext);return NUM_VAR;}
+{letter}({letter}|{digit}|".")*"$"    {strcpy(yylval.str,yytext);return STR_VAR;}
 .							;
 %%	
 
