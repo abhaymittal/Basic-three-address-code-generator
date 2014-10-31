@@ -8,7 +8,7 @@
 %union{int ival; double dval; char str[120];}
 
 /*Keywords*/
-%token PRINT END
+%token PRINT END 
 
 /*Data type tokens*/
 %token <ival> INTEGER
@@ -32,6 +32,7 @@ Program
 
 Line	
 	: PRINT Output				{printf("\n");}
+	| LET Assignment
 	| END
 
 
@@ -45,6 +46,9 @@ Output2
 	| Empty	
 /*PRINTING SECTION END*/
 
+/*VARIABLE SECTION BEGIN*/
+
+/*VARIABLE SECTION BEGIN*/
 
 /*ARITHMETIC SECTION BEGIN*/
 ArithmExpr
