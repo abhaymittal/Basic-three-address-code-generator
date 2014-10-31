@@ -20,6 +20,7 @@
 %token <dval> DOUBLE
 %token <str> STRING_LITERAL
 %token <str> VARIABLE
+%token <str> NUM_VAR STR_VAR
 
 
 /*Grammar's Variable(Non-terminal) types*/
@@ -38,8 +39,9 @@ Program
 	| Line
 
 Line	
-	: PRINT Output				{fprintf(fPtr,"PRINT \"\\n\"\nx");}
-	| LET 
+	: PRINT Output				{fprintf(fPtr,"PRINT \"\\n\"\n");}
+	| LET Assignment
+	| Assignment
 	| END
 
 
@@ -47,15 +49,19 @@ Line
 Output
 	: Output2 ArithmExpr		{fprintf(fPtr,"PRINT %s\n",$2);counter=0;}
 	| Output2 STRING_LITERAL	{fprintf(fPtr,"PRINT %s\n",$2);}
+	| Output2 STR_VAR			{fprintf(fPtr,"PRINT %s\n",$2);}
 	
 Output2
 	: Output ','				
 	| Empty	
 /*PRINTING SECTION END*/
-
+	
+/*VARIABLE SECTION BEGIN*/
+Assignment
+	: NUM_VAR '=' ArithmExpr		{fprintf(fPtr,"%s = %s\n",$1,$3);counter=0;}
+	| STR_VAR '=' STRING_LITERAL	{fprintf(fPtr,"%s = %s\n",$1,$3);}
 /*VARIABLE SECTION BEGIN*/
 
-/*VARIABLE SECTION BEGIN*/
 
 /*ARITHMETIC SECTION BEGIN*/
 ArithmExpr
@@ -64,9 +70,10 @@ ArithmExpr
 	| ArithmExpr '/' ArithmExpr	{sprintf(tVar,"t%d",genTempIndex());strcpy($$,tVar);fprintf(fPtr,"%s=getNewTemp()\n",$$);fprintf(fPtr,"%s=%s/%s\n",$$,$1,$3);}
 	| ArithmExpr '+' ArithmExpr	{sprintf(tVar,"t%d",genTempIndex());strcpy($$,tVar);fprintf(fPtr,"%s=getNewTemp()\n",$$);fprintf(fPtr,"%s=%s+%s\n",$$,$1,$3);}
 	| ArithmExpr '-' ArithmExpr	{sprintf(tVar,"t%d",genTempIndex());strcpy($$,tVar);fprintf(fPtr,"%s=getNewTemp()\n",$$);fprintf(fPtr,"%s=%s-%s\n",$$,$1,$3);}
-	| '-' ArithmExpr %prec NEGATION  {sprintf(tVar,"t%d",genTempIndex());strcpy($$,tVar);fprintf(fPtr,"%s=getNewTemp()\n",$$);fprintf(fPtr,"%s=-1*%s",$$,$2);}
+	| '-' ArithmExpr %prec NEGATION {sprintf(tVar,"t%d",genTempIndex());strcpy($$,tVar);fprintf(fPtr,"%s=getNewTemp()\n",$$);fprintf(fPtr,"%s=-1*%s\n",$$,$2);}
 	| INTEGER					{sprintf($$,"%d",$1);}
-	| '(' ArithmExpr ')'		{strcpy($$,$2);};
+	| NUM_VAR 				    {strcpy($$,$1);}
+	| '(' ArithmExpr ')'		{strcpy($$,$2);}
 /*ARITHMETIC SECTION END*/
 
 
