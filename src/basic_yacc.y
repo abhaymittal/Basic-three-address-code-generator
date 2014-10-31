@@ -13,7 +13,7 @@
 %union{int ival; double dval; char str[120];}
 
 /*Keywords*/
-%token PRINT END LET
+%token PRINT END LET INPUT
 
 /*Data type tokens*/
 %token <ival> INTEGER
@@ -42,6 +42,8 @@ Line
 	: PRINT Output				{fprintf(fPtr,"PRINT \"\\n\"\n");}
 	| LET Assignment
 	| Assignment
+	| INPUT NUM_VAR				{fprintf(fPtr,"SCAN %s\n",$2);}
+	| INPUT STR_VAR				{fprintf(fPtr,"SCAN %s\n",$2);}
 	| END
 
 
