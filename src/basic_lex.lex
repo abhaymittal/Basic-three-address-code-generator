@@ -20,6 +20,7 @@ whitespace [ \t]
 \n							;
 (end) 						{return END;}
 (let)						{return LET;}
+(input)						{return INPUT;}
 {letter}({letter}|{digit}|".")*[#&%]? {strcpy(yylval.str,yytext);return NUM_VAR;}
 {letter}({letter}|{digit}|".")*"$"    {strcpy(yylval.str,yytext);return STR_VAR;}
 .							;
