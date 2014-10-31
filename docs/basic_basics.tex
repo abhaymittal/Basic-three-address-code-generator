@@ -27,8 +27,14 @@
   \textbf{Command / Statement} & \textbf{Meaning} \\  \hline
   PRINT & \begin{tabular}{l}This statement is used to print output on the screen \\
   Note: To print more than one item, separate the items by using \\commas (,) and the items are separated by 
-  tabs in the output. \end{tabular} \\ \hline
+  tabs in the output.\\Syntax: PRINT A,B,C \end{tabular} \\ \hline
+  
   END & Tells computer that the program has finished \\ \hline
+  
+  LET & \begin{tabular}{l}Change value of variables \\
+  Syntax: LET VarName = VarValue\end{tabular} \\ \hline
+  
+  
  \end{tabular}
  
  \pagebreak
@@ -47,10 +53,33 @@
   ' & Comment & NA \\  \hline
   
  \end{tabular}
+ \section{\color{red}Variable Naming Rules}
+ \begin{itemize}
+  \item Var name is up to 40 characters long
+  \item Var name begins with alphabet
+  \item The rest of the characters must be A-Z, a-z, 0-9, or .
+  \item No spaces within the name
+  \item Var name must not be in use for something else
+  \item Var name isn't case sensitive
+  \item The last character of the variable name tells what type of data the memory holds:\\ \\
+  \begin{tabular}{| l | l |}
+    \hline
+    \textbf{Last Character} & \textbf{Data type of variable} \\ \hline
+    \% & Integer \\ \hline
+    \& & Potentially very big integer \\ \hline
+    [No Special symbol] & Floating point number (can have decimal point) \\ \hline
+    \# & Potentially very big floating point number \\ \hline
+    \$ & String of characters \\ \hline
+  \end{tabular}
+
+  \item Consider the following peice of code:\\var\\var=10\\print var\\It will give duplicate definition error because of first line which contains only variable name. That variable becomes unusable.
+ \end{itemize}
+
  
  \section{\color{red}Some important points}
  
  \begin{itemize}
+  \item Comma in print produces a tab while printing output
   \item Double quotes ('') are used to encapsulate a string. e.g. ``Hello World''
   \item Division of integers can produce floating quotient
   \item Qbasic can handle floating point powers also (e.g. 10\^{}1.2).
