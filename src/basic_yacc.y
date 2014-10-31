@@ -45,7 +45,7 @@ Line
 
 /*PRINTING SECTION BEGIN*/
 Output
-	: Output2 ArithmExpr		{fprintf(fPtr,"PRINT %s\n",$2);}
+	: Output2 ArithmExpr		{fprintf(fPtr,"PRINT %s\n",$2);counter=0;}
 	| Output2 STRING_LITERAL	{fprintf(fPtr,"PRINT %s\n",$2);}
 	
 Output2
