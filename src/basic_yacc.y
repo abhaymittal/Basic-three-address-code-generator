@@ -1,6 +1,7 @@
 %{
 	#include<stdio.h>
-	#include<math.h>
+	#include<string.h>
+	#include<stdlib.h>
 	int yylex(void);
 	FILE *fPtr;
 	int counter=0;
@@ -44,7 +45,7 @@ Line
 
 /*PRINTING SECTION BEGIN*/
 Output
-	: Output2 ArithmExpr		{int x=$2; if(x==$2) printf("PRINT %d",x); else printf("PRINT %f",$2);}
+	: Output2 ArithmExpr		{fprintf(fPtr,"PRINT %s\n",$2);}
 	| Output2 STRING_LITERAL	{fprintf(fPtr,"PRINT %s\n",$2);}
 	
 Output2
@@ -58,14 +59,14 @@ Output2
 
 /*ARITHMETIC SECTION BEGIN*/
 ArithmExpr
-	: ArithmExpr '^' ArithmExpr	{sprintf(tVar,"t%d",genTempIndex());strcpy($$,st);fprintf(fPtr,"%s=getNewTemp()\n",$$);fprintf(fPtr,"%s=pow(%d,%d)",$$,$1,$3);}
-	| ArithmExpr '*' ArithmExpr	{$$=$1*$3;}
-	| ArithmExpr '/' ArithmExpr	{$$=$1/$3;}
-	| ArithmExpr '+' ArithmExpr	{$$=$1+$3;}
-	| ArithmExpr '-' ArithmExpr	{$$=$1-$3;}
-	| '-' ArithmExpr %prec NEGATION	{$$=-1 * $2;}
-	| INTEGER					{$$=$1;}
-	| '(' ArithmExpr ')'		{$$=$2;};
+	: ArithmExpr '^' ArithmExpr	{sprintf(tVar,"t%d",genTempIndex());strcpy($$,tVar);fprintf(fPtr,"%s=getNewTemp()\n",$$);fprintf(fPtr,"%s=%s^%s\n",$$,$1,$3);}
+	| ArithmExpr '*' ArithmExpr	{sprintf(tVar,"t%d",genTempIndex());strcpy($$,tVar);fprintf(fPtr,"%s=getNewTemp()\n",$$);fprintf(fPtr,"%s=%s*%s\n",$$,$1,$3);}
+	| ArithmExpr '/' ArithmExpr	{sprintf(tVar,"t%d",genTempIndex());strcpy($$,tVar);fprintf(fPtr,"%s=getNewTemp()\n",$$);fprintf(fPtr,"%s=%s/%s\n",$$,$1,$3);}
+	| ArithmExpr '+' ArithmExpr	{sprintf(tVar,"t%d",genTempIndex());strcpy($$,tVar);fprintf(fPtr,"%s=getNewTemp()\n",$$);fprintf(fPtr,"%s=%s+%s\n",$$,$1,$3);}
+	| ArithmExpr '-' ArithmExpr	{sprintf(tVar,"t%d",genTempIndex());strcpy($$,tVar);fprintf(fPtr,"%s=getNewTemp()\n",$$);fprintf(fPtr,"%s=%s-%s\n",$$,$1,$3);}
+	| '-' ArithmExpr %prec NEGATION  {sprintf(tVar,"t%d",genTempIndex());strcpy($$,tVar);fprintf(fPtr,"%s=getNewTemp()\n",$$);fprintf(fPtr,"%s=-1*%s",$$,$2);}
+	| INTEGER					{sprintf($$,"%d",$1);}
+	| '(' ArithmExpr ')'		{strcpy($$,$2);};
 /*ARITHMETIC SECTION END*/
 
 
