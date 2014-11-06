@@ -7,7 +7,7 @@
 	int tempCounter=0;
 	int labelCounter=0;
 	char tVar[12];
-	char label[12];
+	int labelIndex;
 	int genTempIndex();
 	int genLabelIndex();
 %}
@@ -55,7 +55,9 @@ Statement
 	| Assignment
 	| INPUT NUM_VAR				{fprintf(fPtr,"SCAN %s\n",$2);}
 	| INPUT STR_VAR				{fprintf(fPtr,"SCAN %s\n",$2);}
-	| DO{sprintf(label,"l%d",genLabelIndex());fprintf(fPtr,"%s=getNewLabel()\n",label);fprintf(fPtr,"%s: ",label);}Statements LOOP	{fprintf(fPtr,"goto %s\n",label);}
+	| Loop
+	
+
 
 
 /*PRINTING SECTION BEGIN*/
@@ -92,6 +94,11 @@ ArithmExpr
 /*RELATIONAL SECTION BEGIN*/
 
 /*RELATIONAL SECTION END*/
+
+/*LOOP CONSTRUCTS BEGIN */
+Loop
+	: DO{labelIndex=genLabelIndex();fprintf(fPtr,"l%d: ",labelIndex);}Statements LOOP	{fprintf(fPtr,"goto l%d\n",labelIndex);labelIndex--;}
+/*LOOP CONSTRUCTS END*/
 
 Empty:	; /*EPSILON*/
 
