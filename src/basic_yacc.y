@@ -130,7 +130,7 @@ void pushLabelIndex(int label) {
 	labelIndexStack=temp;
 }
 
-int popLabel() {
+int popLabelIndex() {
 	struct intStruct* temp;
 	int label;
 	temp=labelIndexStack;
