@@ -15,12 +15,17 @@ whitespace [ \t]
 {digit}+ 					{yylval.ival = atoi(yytext);return INTEGER;}
 {digit}+"."{digit}+ 		{yylval.dval=atof(yytext);return DOUBLE;}
 \"([^\n\"]|\"\")*\"			{strcpy(yylval.str,yytext);return STRING_LITERAL;}
-(P|p)(R|r)(I|i)(N|n)(T|t) 	{return PRINT;}
 [-+*^,()=/]					{return *yytext;}	
 \n							;
+
+(print)					 	{return PRINT;}
 (end) 						{return END;}
 (let)						{return LET;}
 (input)						{return INPUT;}
+(do)						{return DO;}
+(loop)						{return LOOP;}
+
+
 {letter}({letter}|{digit}|".")*[#&%]? {strcpy(yylval.str,yytext);return NUM_VAR;}
 {letter}({letter}|{digit}|".")*"$"    {strcpy(yylval.str,yytext);return STR_VAR;}
 .							;
