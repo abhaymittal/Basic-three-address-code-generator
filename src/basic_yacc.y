@@ -10,6 +10,15 @@
 	int labelIndex;
 	int genTempIndex();
 	int genLabelIndex();
+	struct intStruct {
+		int val;
+		struct intStruct* next;
+	};
+	
+	struct intStruct *labelIndexStack;
+	
+	void pushLabelIndex(int label);
+	int popLabelIndex();
 %}
 
 %start Program
@@ -97,7 +106,7 @@ ArithmExpr
 
 /*LOOP CONSTRUCTS BEGIN */
 Loop
-	: DO{labelIndex=genLabelIndex();fprintf(fPtr,"l%d: ",labelIndex);}Statements LOOP	{fprintf(fPtr,"goto l%d\n",labelIndex);labelIndex--;}
+	: DO{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);}Statements LOOP	{labelIndex=popLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);}
 /*LOOP CONSTRUCTS END*/
 
 Empty:	; /*EPSILON*/
@@ -113,6 +122,23 @@ int genLabelIndex() {
 	return labelCounter;
 }
 
+void pushLabelIndex(int label) {
+	struct intStruct* temp;
+	temp=(struct intStruct*)malloc(sizeof(struct intStruct));
+	temp->val=label;
+	temp->next=labelIndexStack;
+	labelIndexStack=temp;
+}
+
+int popLabel() {
+	struct intStruct* temp;
+	int label;
+	temp=labelIndexStack;
+	labelIndexStack=labelIndexStack->next;
+	label=temp->val;
+	free(temp);
+	return label;
+}
 void yyerror (char const *s) {
 	fprintf (stderr, "%s\n", s);
 }
