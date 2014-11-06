@@ -4,7 +4,7 @@
 	#include<stdlib.h>
 	int yylex(void);
 	FILE *fPtr;
-	int counter=0;
+	int tempCounter=0;
 	char tVar[12];
 	int genTempIndex();
 %}
@@ -35,21 +35,21 @@
 %%
 
 Program 
-	: Line Program
-	| Line
+	: Statement Program
+	| Statement
+	| END
 
-Line	
+Statement	
 	: PRINT Output				{fprintf(fPtr,"PRINT \"\\n\"\n");}
 	| LET Assignment
 	| Assignment
 	| INPUT NUM_VAR				{fprintf(fPtr,"SCAN %s\n",$2);}
 	| INPUT STR_VAR				{fprintf(fPtr,"SCAN %s\n",$2);}
-	| END
 
 
 /*PRINTING SECTION BEGIN*/
 Output
-	: Output2 ArithmExpr		{fprintf(fPtr,"PRINT %s\n",$2);counter=0;}
+	: Output2 ArithmExpr		{fprintf(fPtr,"PRINT %s\n",$2);tempCounter=0;}
 	| Output2 STRING_LITERAL	{fprintf(fPtr,"PRINT %s\n",$2);}
 	| Output2 STR_VAR			{fprintf(fPtr,"PRINT %s\n",$2);}
 	
@@ -60,7 +60,7 @@ Output2
 	
 /*VARIABLE SECTION BEGIN*/
 Assignment
-	: NUM_VAR '=' ArithmExpr		{fprintf(fPtr,"%s = %s\n",$1,$3);counter=0;}
+	: NUM_VAR '=' ArithmExpr		{fprintf(fPtr,"%s = %s\n",$1,$3);tempCounter=0;}
 	| STR_VAR '=' STRING_LITERAL	{fprintf(fPtr,"%s = %s\n",$1,$3);}
 /*VARIABLE SECTION BEGIN*/
 
@@ -83,8 +83,8 @@ Empty:	; /*EPSILON*/
 
 %%
 int genTempIndex() {
-	counter++;
-	return counter;
+	tempCounter++;
+	return tempCounter;
 }
 
 void yyerror (char const *s) {
