@@ -5,8 +5,11 @@
 	int yylex(void);
 	FILE *fPtr;
 	int tempCounter=0;
+	int labelCounter=0;
 	char tVar[12];
+	char label[12];
 	int genTempIndex();
+	int genLabelIndex();
 %}
 
 %start Program
@@ -14,6 +17,7 @@
 
 /*Keywords*/
 %token PRINT END LET INPUT
+%token DO LOOP
 
 /*Data type tokens*/
 %token <ival> INTEGER
@@ -34,10 +38,16 @@
 
 %%
 
-Program 
-	: Statement Program
+Program
+	: Statements End {fprintf(fPtr,"exit\n");}
+	
+End
+	: END
+	| Empty
+
+Statements
+	: Statement Statements
 	| Statement
-	| END
 
 Statement	
 	: PRINT Output				{fprintf(fPtr,"PRINT \"\\n\"\n");}
@@ -45,6 +55,7 @@ Statement
 	| Assignment
 	| INPUT NUM_VAR				{fprintf(fPtr,"SCAN %s\n",$2);}
 	| INPUT STR_VAR				{fprintf(fPtr,"SCAN %s\n",$2);}
+	| DO{sprintf(label,"l%d",genLabelIndex());fprintf(fPtr,"%s=getNewLabel()\n",label);fprintf(fPtr,"%s: ",label);}Statements LOOP	{fprintf(fPtr,"goto %s\n",label);}
 
 
 /*PRINTING SECTION BEGIN*/
@@ -78,6 +89,9 @@ ArithmExpr
 	| '(' ArithmExpr ')'		{strcpy($$,$2);}
 /*ARITHMETIC SECTION END*/
 
+/*RELATIONAL SECTION BEGIN*/
+
+/*RELATIONAL SECTION END*/
 
 Empty:	; /*EPSILON*/
 
@@ -85,6 +99,11 @@ Empty:	; /*EPSILON*/
 int genTempIndex() {
 	tempCounter++;
 	return tempCounter;
+}
+
+int genLabelIndex() {
+	labelCounter++;
+	return labelCounter;
 }
 
 void yyerror (char const *s) {
