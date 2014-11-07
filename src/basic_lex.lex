@@ -34,6 +34,9 @@ whitespace [ \t]
 (do)						{return DO;}
 (loop)						{return LOOP;}
 (while)						{return WHILE;}
+(if)						{return IF;}
+(then)						{return THEN;}
+(else)						{return ELSE;}
 
 
 {letter}({letter}|{digit}|".")*[#&%]? {strcpy(yylval.str,yytext);return NUM_VAR;}
