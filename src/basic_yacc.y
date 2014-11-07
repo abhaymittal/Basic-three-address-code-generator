@@ -28,6 +28,7 @@
 %token PRINT END LET INPUT
 %token DO LOOP WHILE
 %token <str> LT LTE GT GTE EQ NEQ
+%token IF THEN ELSE
 
 /*Data type tokens*/
 %token <ival> INTEGER
@@ -67,6 +68,7 @@ Statement
 	| INPUT NUM_VAR				{fprintf(fPtr,"SCAN %s\n",$2);}
 	| INPUT STR_VAR				{fprintf(fPtr,"SCAN %s\n",$2);}
 	| Loop
+	| Decision
 	
 
 
@@ -120,6 +122,15 @@ Loop
 	: DO{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);}Statements LOOP	{labelIndex=popLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);}
 	| DO{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);} WHILE{fprintf(fPtr,"ifFalse ");} RelExpr {labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"goto l%d\n",labelIndex);}Statements LOOP {int lblIndexF=popLabelIndex();fprintf(fPtr,"goto l%d\n",popLabelIndex());fprintf(fPtr,"l%d: ",lblIndexF);}
 /*LOOP CONSTRUCTS END*/
+
+/*IF ELSE SECTION BEGIN*/
+Decision
+	: IF {fprintf(fPtr,"ifFalse ");} RelExpr THEN{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"go to l%d\n",labelIndex);} Statements Else END IF {fprintf(fPtr,"l%d: ",popLabelIndex());}
+
+Else
+	: ELSE {labelIndex=genLabelIndex();fprintf(fPtr,"go to l%d\n",labelIndex); fprintf(fPtr,"l%d: ",popLabelIndex());pushLabelIndex(labelIndex);} Statements 
+	| Empty
+/*IF ELSE SECTION END*/
 
 Empty:	; /*EPSILON*/
 
