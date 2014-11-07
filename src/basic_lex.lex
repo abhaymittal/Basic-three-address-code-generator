@@ -15,7 +15,7 @@ whitespace [ \t]
 {digit}+ 					{yylval.ival = atoi(yytext);return INTEGER;}
 {digit}+"."{digit}+ 		{yylval.dval=atof(yytext);return DOUBLE;}
 \"([^\n\"]|\"\")*\"			{strcpy(yylval.str,yytext);return STRING_LITERAL;}
-[-+*^,()=/]					{return *yytext;}	
+[-+*^,()/]					{return *yytext;}	
 \n							;
 
 
