@@ -8,4 +8,4 @@ yacc: basic_yacc.y
 	yacc -d basic_yacc.y
 
 clean:
-	rm comp
+	rm comp lex.yy.c y.tab.c y.tab.h *~ *\#
