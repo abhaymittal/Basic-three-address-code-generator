@@ -24,7 +24,7 @@ whitespace [ \t]
 (>)							{strcpy(yylval.str,yytext);return GT;}
 (>=)						{strcpy(yylval.str,yytext);return GTE;}
 (=)							{strcpy(yylval.str,yytext);return EQ;}
-(!=)						{strcpy(yylval.str,yytext);return NEQ;}
+(<>)						{strcpy(yylval.str,yytext);return NEQ;}
 
 
 (print)					 	{return PRINT;}
