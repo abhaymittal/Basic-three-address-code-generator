@@ -73,7 +73,7 @@ Statement
 
 /*PRINTING SECTION BEGIN*/
 Output
-	: Output2 ArithmExpr		{fprintf(fPtr,"PRINT %s\n",$2);tempCounter=0;}
+	: Output2 ArithmExpr		{fprintf(fPtr,"PRINT %s\n",$2);}
 	| Output2 STRING_LITERAL	{fprintf(fPtr,"PRINT %s\n",$2);}
 	| Output2 STR_VAR			{fprintf(fPtr,"PRINT %s\n",$2);}
 	
@@ -84,8 +84,8 @@ Output2
 	
 /*VARIABLE SECTION BEGIN*/
 Assignment
-	: NUM_VAR '=' ArithmExpr		{fprintf(fPtr,"%s = %s\n",$1,$3);tempCounter=0;}
-	| STR_VAR '=' STRING_LITERAL	{fprintf(fPtr,"%s = %s\n",$1,$3);}
+	: NUM_VAR EQ ArithmExpr		{fprintf(fPtr,"%s = %s\n",$1,$3);}
+	| STR_VAR EQ STRING_LITERAL	{fprintf(fPtr,"%s = %s\n",$1,$3);}
 /*VARIABLE SECTION BEGIN*/
 
 
@@ -119,7 +119,6 @@ RelOp
 Loop
 	: DO{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);}Statements LOOP	{labelIndex=popLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);}
 	| DO{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);} WHILE{fprintf(fPtr,"ifFalse ");} RelExpr {labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"goto l%d\n",labelIndex);}Statements LOOP {int lblIndexF=popLabelIndex();fprintf(fPtr,"goto l%d\n",popLabelIndex());fprintf(fPtr,"l%d: ",lblIndexF);}
-	
 /*LOOP CONSTRUCTS END*/
 
 Empty:	; /*EPSILON*/
