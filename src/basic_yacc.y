@@ -22,11 +22,12 @@
 %}
 
 %start Program
-%union{int ival; double dval; char str[120];}
+%union{int ival; double dval; char str[120];	}
 
 /*Keywords*/
 %token PRINT END LET INPUT
-%token DO LOOP
+%token DO LOOP WHILE
+%token <str> LT LTE GT GTE EQ NEQ
 
 /*Data type tokens*/
 %token <ival> INTEGER
@@ -38,6 +39,7 @@
 
 /*Grammar's Variable(Non-terminal) types*/
 %type <str> ArithmExpr
+%type <str> RelOp
 
 /*Operator Associativity and Precedence*/
 %left	'-' '+'
@@ -101,12 +103,23 @@ ArithmExpr
 /*ARITHMETIC SECTION END*/
 
 /*RELATIONAL SECTION BEGIN*/
-
+RelExpr
+	: NUM_VAR RelOp ArithmExpr	{fprintf(fPtr,"%s %s %s ", $1,$2,$3);}
+	
+RelOp
+ 	: LT						{strcpy($$,$1);}
+ 	| LTE						{strcpy($$,$1);}
+ 	| GT						{strcpy($$,$1);}
+ 	| GTE						{strcpy($$,$1);}
+ 	| EQ						{strcpy($$,$1);}
+ 	| NEQ						{strcpy($$,$1);}
 /*RELATIONAL SECTION END*/
 
 /*LOOP CONSTRUCTS BEGIN */
 Loop
 	: DO{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);}Statements LOOP	{labelIndex=popLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);}
+	| DO{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);} WHILE{fprintf(fPtr,"ifFalse ");} RelExpr {labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"goto l%d\n",labelIndex);}Statements LOOP {int lblIndexF=popLabelIndex();fprintf(fPtr,"goto l%d\n",popLabelIndex());fprintf(fPtr,"l%d: ",lblIndexF);}
+	
 /*LOOP CONSTRUCTS END*/
 
 Empty:	; /*EPSILON*/
