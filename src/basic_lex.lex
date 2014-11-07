@@ -18,12 +18,22 @@ whitespace [ \t]
 [-+*^,()=/]					{return *yytext;}	
 \n							;
 
+
+(<)							{strcpy(yylval.str,yytext);return LT;}
+(<=)						{strcpy(yylval.str,yytext);return LTE;}
+(>)							{strcpy(yylval.str,yytext);return GT;}
+(>=)						{strcpy(yylval.str,yytext);return GTE;}
+(=)							{strcpy(yylval.str,yytext);return EQ;}
+(!=)						{strcpy(yylval.str,yytext);return NEQ;}
+
+
 (print)					 	{return PRINT;}
 (end) 						{return END;}
 (let)						{return LET;}
 (input)						{return INPUT;}
 (do)						{return DO;}
 (loop)						{return LOOP;}
+(while)						{return WHILE;}
 
 
 {letter}({letter}|{digit}|".")*[#&%]? {strcpy(yylval.str,yytext);return NUM_VAR;}
