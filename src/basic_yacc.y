@@ -29,6 +29,7 @@
 %token DO LOOP WHILE
 %token <str> LT LTE GT GTE EQ NEQ
 %token IF THEN ELSE
+%token AND OR NOT
 
 /*Data type tokens*/
 %token <ival> INTEGER
@@ -47,6 +48,9 @@
 %left	'*' '/'
 %left	NEGATION
 %right	'^'
+%left	NOT
+%left	AND
+%left	OR
 
 %%
 
@@ -117,6 +121,17 @@ RelOp
  	| NEQ						{strcpy($$,$1);}
 /*RELATIONAL SECTION END*/
 
+
+/*LOGICAL SECTION BEGIN*/
+LogicExpr
+	: RelExpr	
+	| RelExpr AND RelExpr
+	| RelExpr OR RelExpr
+	| NOT RelExpr
+	
+/*LOGICAL SECTION END*/
+
+
 /*LOOP CONSTRUCTS BEGIN */
 Loop
 	: DO{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);}Statements LOOP	{labelIndex=popLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);}
@@ -125,7 +140,7 @@ Loop
 
 /*IF ELSE SECTION BEGIN*/
 Decision
-	: IF {fprintf(fPtr,"ifFalse ");} RelExpr THEN{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"go to l%d\n",labelIndex);} Statements Else END IF {fprintf(fPtr,"l%d: ",popLabelIndex());}
+	: IF {fprintf(fPtr,"ifFalse ");} LogicExpr THEN{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"go to l%d\n",labelIndex);} Statements Else END IF {fprintf(fPtr,"l%d: ",popLabelIndex());}
 
 Else
 	: ELSE {labelIndex=genLabelIndex();fprintf(fPtr,"go to l%d\n",labelIndex); fprintf(fPtr,"l%d: ",popLabelIndex());pushLabelIndex(labelIndex);} Statements 
