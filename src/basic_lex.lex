@@ -37,7 +37,9 @@ whitespace [ \t]
 (if)						{return IF;}
 (then)						{return THEN;}
 (else)						{return ELSE;}
-
+(and)						{return AND;}
+(or)						{return OR;}
+(not)						{return NOT;}
 
 {letter}({letter}|{digit}|".")*[#&%]? {strcpy(yylval.str,yytext);return NUM_VAR;}
 {letter}({letter}|{digit}|".")*"$"    {strcpy(yylval.str,yytext);return STR_VAR;}
