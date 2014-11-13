@@ -22,7 +22,7 @@
 %}
 
 %start Program
-%union{int ival; double dval; char str[120];	}
+%union{int ival; double dval; char str[120]; struct {int trueIndex; int falseIndex;} bool; }
 
 /*Keywords*/
 %token PRINT END LET INPUT
@@ -42,6 +42,9 @@
 /*Grammar's Variable(Non-terminal) types*/
 %type <str> ArithmExpr
 %type <str> RelOp
+%type <bool> RelExpr
+%type <bool> BoolEmpty
+%type <bool> LogicExpr
 
 /*Operator Associativity and Precedence*/
 %left	'-' '+'
@@ -110,7 +113,7 @@ ArithmExpr
 
 /*RELATIONAL SECTION BEGIN*/
 RelExpr
-	: NUM_VAR RelOp ArithmExpr	{fprintf(fPtr,"%s %s %s ", $1,$2,$3);}
+	: NUM_VAR RelOp ArithmExpr	{fprintf(fPtr, "If %s %s %s goto l%d\n",$1,$2,$3); fprintf(fPtr,"goto l%d\n");}
 	
 RelOp
  	: LT						{strcpy($$,$1);}
@@ -124,10 +127,10 @@ RelOp
 
 /*LOGICAL SECTION BEGIN*/
 LogicExpr
-	: RelExpr	
-	| RelExpr AND RelExpr
-	| RelExpr OR RelExpr
-	| NOT RelExpr
+	: RelExpr
+	/*| BoolEmpty{$1.trueIndex=genLabelIndex();$1.falseIndex=$$.falseIndex;} LogicExpr AND {fprintf(fPtr,"l%d: ",$1.trueIndex);} BoolEmpty{$4.trueIndex=$$.trueIndex;$4.falseIndex=$$.falseIndex;} LogicExpr
+	| BoolEmpty{$1.trueIndex=$0.trueIndex;$1.falseIndex=$0.trueIndex;} LogicExpr OR LogicExpr
+	| NOT BoolEmpty{$1.trueIndex=$0.trueIndex;$1.falseIndex=$0.trueIndex;} LogicExpr*/
 	
 /*LOGICAL SECTION END*/
 
@@ -135,20 +138,20 @@ LogicExpr
 /*LOOP CONSTRUCTS BEGIN */
 Loop
 	: DO{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);}Statements LOOP	{labelIndex=popLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);}
-	| DO{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);} WHILE{fprintf(fPtr,"ifFalse ");} RelExpr {labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"goto l%d\n",labelIndex);}Statements LOOP {int lblIndexF=popLabelIndex();fprintf(fPtr,"goto l%d\n",popLabelIndex());fprintf(fPtr,"l%d: ",lblIndexF);}
+	/*| DO{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);} WHILE{fprintf(fPtr,"ifFalse ");} RelExpr {labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"goto l%d\n",labelIndex);}Statements LOOP {int lblIndexF=popLabelIndex();fprintf(fPtr,"goto l%d\n",popLabelIndex());fprintf(fPtr,"l%d: ",lblIndexF);}*/
 /*LOOP CONSTRUCTS END*/
 
 /*IF ELSE SECTION BEGIN*/
 Decision
-	: IF {fprintf(fPtr,"ifFalse ");} LogicExpr THEN{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"go to l%d\n",labelIndex);} Statements Else END IF {fprintf(fPtr,"l%d: ",popLabelIndex());}
-
+	: IF LogicExpr THEN Statements Else END IF 
+	
 Else
-	: ELSE {labelIndex=genLabelIndex();fprintf(fPtr,"go to l%d\n",labelIndex); fprintf(fPtr,"l%d: ",popLabelIndex());pushLabelIndex(labelIndex);} Statements 
-	| Empty
+	: {labelIndex=genLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);pushLabelIndex(labelIndex);}ELSE {fprintf(fPtr,"l%d: ",$<bool>-1.falseIndex);} Statements 
+	| Empty {pushLabelIndex($<bool>-1.falseIndex);}
 /*IF ELSE SECTION END*/
 
-Empty:	; /*EPSILON*/
-
+Empty:	{}/*EPSILON*/
+BoolEmpty:	{}	
 %%
 int genTempIndex() {
 	tempCounter++;
