@@ -48,8 +48,8 @@
 %type <bool> RelExpr2
 
 /*Operator Associativity and Precedence*/
-%left	OR ORP
-%left	AND ANDP
+%left	OR
+%left	AND
 %left	NOT
 
 %left	'-' '+'
@@ -127,6 +127,10 @@ RelExpr
 	: NUM_VAR RelOp ArithmExpr	{fprintf(fPtr, "If %s %s %s goto l%d\n",$1,$2,$3,$<bool>-1.trueIndex); fprintf(fPtr,"goto l%d\n",$<bool>-1.falseIndex);}
 	;
 	
+RelExpr2
+	: NUM_VAR RelOp ArithmExpr	{$$.trueIndex=genLabelIndex();$$.falseIndex=genLabelIndex();fprintf(fPtr, "If %s %s %s goto l%d\n",$1,$2,$3,$$.trueIndex); fprintf(fPtr,"goto l%d\n",$$.falseIndex);}
+	;
+	
 RelOp
  	: LT						{strcpy($$,$1);}
  	| LTE						{strcpy($$,$1);}
@@ -142,23 +146,21 @@ RelOp
 
 LogicExpr
 	: RelExpr2  {$$.trueIndex=$1.trueIndex;$$.falseIndex=$1.falseIndex;}
-	| LogicExpr AND {printf(" | AND FOUND for %d and %d| ",$1.trueIndex,$1.falseIndex);fprintf(fPtr,"l%d: ",$1.trueIndex);}  BoolEmpty  {$4.trueIndex=genLabelIndex();$4.falseIndex=$1.falseIndex;} RelExpr {$$.trueIndex=$4.trueIndex;$$.falseIndex=$4.falseIndex;printf("| AND Completed |\n");}
-	| LogicExpr OR  {printf(" | OR FOUND for %d and %d | ",$1.trueIndex,$1.falseIndex);fprintf(fPtr,"l%d: ",$1.falseIndex);}  BoolEmpty  {$4.trueIndex=$1.trueIndex;$4.falseIndex=genLabelIndex();} RelExpr {$$.trueIndex=$4.trueIndex;$$.falseIndex=$4.falseIndex;printf("| OR Completed |\n");} 
+	| LogicExpr AND {fprintf(fPtr,"l%d: ",$1.trueIndex);}  BoolEmpty  {$4.trueIndex=genLabelIndex();$4.falseIndex=$1.falseIndex;} RelExpr {$$.trueIndex=$4.trueIndex;$$.falseIndex=$4.falseIndex;}
+	| LogicExpr OR  {fprintf(fPtr,"l%d: ",$1.falseIndex);}  BoolEmpty  {$4.trueIndex=$1.trueIndex;$4.falseIndex=genLabelIndex();} RelExpr {$$.trueIndex=$4.trueIndex;$$.falseIndex=$4.falseIndex;} 
 	;
 	
-RelExpr2
-	: NUM_VAR RelOp ArithmExpr	{$$.trueIndex=genLabelIndex();$$.falseIndex=genLabelIndex();fprintf(fPtr, "If %s %s %s goto l%d\n",$1,$2,$3,$$.trueIndex); fprintf(fPtr,"goto l%d\n",$$.falseIndex);}
-	;
 	
 /*LOGICAL SECTION END*/
 
 
 /*LOOP CONSTRUCTS BEGIN */
 Loop
-	: DO{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);}Statements LOOP	{labelIndex=popLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);}
-	/*| DO{labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);} WHILE{fprintf(fPtr,"ifFalse ");} RelExpr {labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"goto l%d\n",labelIndex);}Statements LOOP {int lblIndexF=popLabelIndex();fprintf(fPtr,"goto l%d\n",popLabelIndex());fprintf(fPtr,"l%d: ",lblIndexF);}*/
-/*LOOP CONSTRUCTS END*/
+	: DO {labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);} Statements LOOP	{labelIndex=popLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);}
+	| DO {labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);} WHILE LogicExpr {fprintf(fPtr,"l%d: ",$4.trueIndex);} Statements LOOP {fprintf(fPtr,"goto l%d\n",popLabelIndex());fprintf(fPtr,"l%d: ",$4.falseIndex);}
 	;
+	
+/*LOOP CONSTRUCTS END*/
 
 /*IF ELSE SECTION BEGIN*/
 Decision
