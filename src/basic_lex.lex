@@ -40,7 +40,9 @@ whitespace [ \t]
 (and)						{return AND;}
 (or)						{return OR;}
 (not)						{return NOT;}
-
+(for)						{return FOR;}
+(next)						{return NEXT;}
+(to)						{return TO;}
 {letter}({letter}|{digit}|".")*[#&%]? {strcpy(yylval.str,yytext);return NUM_VAR;}
 {letter}({letter}|{digit}|".")*"$"    {strcpy(yylval.str,yytext);return STR_VAR;}
 .							;
