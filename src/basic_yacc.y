@@ -47,13 +47,15 @@
 %type <bool> LogicExpr
 
 /*Operator Associativity and Precedence*/
+%left	OR
+%left	AND
+%left	NOT
+
 %left	'-' '+'
 %left	'*' '/'
 %left	NEGATION
 %right	'^'
-%left	NOT
-%left	AND
-%left	OR
+
 
 %%
 
@@ -113,7 +115,7 @@ ArithmExpr
 
 /*RELATIONAL SECTION BEGIN*/
 RelExpr
-	: NUM_VAR RelOp ArithmExpr	{fprintf(fPtr, "If %s %s %s goto l%d\n",$1,$2,$3); fprintf(fPtr,"goto l%d\n");}
+	: NUM_VAR RelOp ArithmExpr	{fprintf(fPtr, "If %s %s %s goto l%d\n",$1,$2,$3,$<bool>-1.trueIndex); fprintf(fPtr,"goto l%d\n",$<bool>-1.falseIndex);}
 	
 RelOp
  	: LT						{strcpy($$,$1);}
@@ -127,10 +129,9 @@ RelOp
 
 /*LOGICAL SECTION BEGIN*/
 LogicExpr
-	: RelExpr
-	/*| BoolEmpty{$1.trueIndex=genLabelIndex();$1.falseIndex=$$.falseIndex;} LogicExpr AND {fprintf(fPtr,"l%d: ",$1.trueIndex);} BoolEmpty{$4.trueIndex=$$.trueIndex;$4.falseIndex=$$.falseIndex;} LogicExpr
-	| BoolEmpty{$1.trueIndex=$0.trueIndex;$1.falseIndex=$0.trueIndex;} LogicExpr OR LogicExpr
-	| NOT BoolEmpty{$1.trueIndex=$0.trueIndex;$1.falseIndex=$0.trueIndex;} LogicExpr*/
+	: BoolEmpty {$1.trueIndex=genLabelIndex();$1.falseIndex=genLabelIndex();} RelExpr {$$.trueIndex=$1.trueIndex;$$.falseIndex=$1.falseIndex;}
+	| LogicExpr AND  BoolEmpty {fprintf(fPtr,"l%d: ",$1.trueIndex);} {$3.trueIndex=genLabelIndex();$3.falseIndex=$1.falseIndex;} RelExpr {$$.trueIndex=$3.trueIndex;$$.falseIndex=$3.falseIndex;}
+	| LogicExpr OR BoolEmpty   {fprintf(fPtr,"l%d: ",$1.falseIndex);} {$3.trueIndex=$1.trueIndex;$3.falseIndex=genLabelIndex();} RelExpr {$$.trueIndex=$3.trueIndex;$$.falseIndex=$3.falseIndex;}
 	
 /*LOGICAL SECTION END*/
 
@@ -143,11 +144,11 @@ Loop
 
 /*IF ELSE SECTION BEGIN*/
 Decision
-	: IF LogicExpr THEN Statements Else END IF 
+	: IF LogicExpr THEN {fprintf(fPtr,"l%d: ",$2.trueIndex);} Statements BoolEmpty {$6.trueIndex=$2.trueIndex;$6.falseIndex=$2.falseIndex;} Else END IF 
 	
 Else
-	: {labelIndex=genLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);pushLabelIndex(labelIndex);}ELSE {fprintf(fPtr,"l%d: ",$<bool>-1.falseIndex);} Statements 
-	| Empty {pushLabelIndex($<bool>-1.falseIndex);}
+	: {labelIndex=genLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);pushLabelIndex(labelIndex);}ELSE {fprintf(fPtr,"l%d: ",$<bool>-1.falseIndex);} Statements {labelIndex=popLabelIndex();fprintf(fPtr,"l%d: ",labelIndex);}
+	| Empty {fprintf(fPtr,"l%d: ",$<bool>-1.falseIndex);}
 /*IF ELSE SECTION END*/
 
 Empty:	{}/*EPSILON*/
