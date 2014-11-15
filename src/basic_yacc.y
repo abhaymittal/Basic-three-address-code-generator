@@ -162,8 +162,8 @@ LogicExpr
 Loop
 	: DO {labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);} Statements LOOP	{labelIndex=popLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);}
 	| DO {labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);} WHILE LogicExpr {fprintf(fPtr,"l%d: ",$4.trueIndex);} Statements LOOP {fprintf(fPtr,"goto l%d\n",popLabelIndex());fprintf(fPtr,"l%d: ",$4.falseIndex);}
-	| FOR NUM_VAR EQ ArithmExpr TO ArithmExpr {fprintf(fPtr,"%s = %s\n",$2,$4);labelIndex=genLabelIndex();fprintf(fPtr,"l%d: ",labelIndex); pushLabelIndex(labelIndex); int beginLabel=genLabelIndex();fprintf(fPtr,"if %s < %s goto l%d\n",$2,$6,beginLabel);labelIndex=genLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",beginLabel);} Statements  NEXT NUM_VAR 
-	{if(strcmp($2,$10)!=0){printf("\n%s and %s\n",$2,$10);yyerror("Error: Counter variable not used in NEXT");exit(2);}fprintf(fPtr,"%s=%s+1\n",$10,$10);int falseLabel=popLabelIndex();fprintf(fPtr,"goto l%d\n",popLabelIndex());fprintf(fPtr,"l%d: ",falseLabel);}
+	| FOR NUM_VAR EQ ArithmExpr TO ArithmExpr {fprintf(fPtr,"%s = %s\n",$2,$4);labelIndex=genLabelIndex();fprintf(fPtr,"l%d: ",labelIndex); pushLabelIndex(labelIndex); int beginLabel=genLabelIndex();fprintf(fPtr,"if %s <= %s goto l%d\n",$2,$6,beginLabel);labelIndex=genLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",beginLabel);} Statements  NEXT NUM_VAR 
+	{if(strcmp($2,$10)!=0){yyerror("Error: Counter variable not used in NEXT");exit(2);}fprintf(fPtr,"%s=%s+1\n",$10,$10);int falseLabel=popLabelIndex();fprintf(fPtr,"goto l%d\n",popLabelIndex());fprintf(fPtr,"l%d: ",falseLabel);}
 	;
 	
 /*LOOP CONSTRUCTS END*/
