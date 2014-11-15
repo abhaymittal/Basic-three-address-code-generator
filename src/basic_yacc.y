@@ -45,10 +45,11 @@
 %type <bool> RelExpr
 %type <bool> BoolEmpty
 %type <bool> LogicExpr
+%type <bool> RelExpr2
 
 /*Operator Associativity and Precedence*/
-%left	ORP
-%left	ANDP
+%left	OR ORP
+%left	AND ANDP
 %left	NOT
 
 %left	'-' '+'
@@ -138,10 +139,15 @@ RelOp
 
 
 /*LOGICAL SECTION BEGIN*/
+
 LogicExpr
-	: BoolEmpty {$1.trueIndex=genLabelIndex();$1.falseIndex=genLabelIndex();} RelExpr {$$.trueIndex=$1.trueIndex;$$.falseIndex=$1.falseIndex;}
-	| LogicExpr AND   BoolEmpty {fprintf(fPtr,"l%d: ",$1.trueIndex);} {$3.trueIndex=genLabelIndex();$3.falseIndex=$1.falseIndex;} RelExpr {$$.trueIndex=$3.trueIndex;$$.falseIndex=$3.falseIndex;}
-	| LogicExpr OR  BoolEmpty   {fprintf(fPtr,"l%d: ",$1.falseIndex);} {$3.trueIndex=$1.trueIndex;$3.falseIndex=genLabelIndex();} RelExpr {$$.trueIndex=$3.trueIndex;$$.falseIndex=$3.falseIndex;}
+	: RelExpr2  {$$.trueIndex=$1.trueIndex;$$.falseIndex=$1.falseIndex;}
+	| LogicExpr AND {printf(" | AND FOUND for %d and %d| ",$1.trueIndex,$1.falseIndex);fprintf(fPtr,"l%d: ",$1.trueIndex);}  BoolEmpty  {$4.trueIndex=genLabelIndex();$4.falseIndex=$1.falseIndex;} RelExpr {$$.trueIndex=$4.trueIndex;$$.falseIndex=$4.falseIndex;printf("| AND Completed |\n");}
+	| LogicExpr OR  {printf(" | OR FOUND for %d and %d | ",$1.trueIndex,$1.falseIndex);fprintf(fPtr,"l%d: ",$1.falseIndex);}  BoolEmpty  {$4.trueIndex=$1.trueIndex;$4.falseIndex=genLabelIndex();} RelExpr {$$.trueIndex=$4.trueIndex;$$.falseIndex=$4.falseIndex;printf("| OR Completed |\n");} 
+	;
+	
+RelExpr2
+	: NUM_VAR RelOp ArithmExpr	{$$.trueIndex=genLabelIndex();$$.falseIndex=genLabelIndex();fprintf(fPtr, "If %s %s %s goto l%d\n",$1,$2,$3,$$.trueIndex); fprintf(fPtr,"goto l%d\n",$$.falseIndex);}
 	;
 	
 /*LOGICAL SECTION END*/
