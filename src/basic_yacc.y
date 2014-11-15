@@ -26,7 +26,7 @@
 
 /*Keywords*/
 %token PRINT END LET INPUT
-%token DO LOOP WHILE
+%token DO LOOP WHILE FOR NEXT TO
 %token <str> LT LTE GT GTE EQ NEQ
 %token IF THEN ELSE
 %token AND OR NOT
@@ -102,8 +102,12 @@ Output2
 	
 /*VARIABLE SECTION BEGIN*/
 Assignment
-	: NUM_VAR EQ ArithmExpr		{fprintf(fPtr,"%s = %s\n",$1,$3);}
+	: NumAssignment
 	| STR_VAR EQ STRING_LITERAL	{fprintf(fPtr,"%s = %s\n",$1,$3);}
+	;
+	
+NumAssignment
+	: NUM_VAR EQ ArithmExpr		{fprintf(fPtr,"%s = %s\n",$1,$3);}
 	;
 /*VARIABLE SECTION BEGIN*/
 
