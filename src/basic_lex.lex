@@ -2,8 +2,10 @@
 	#include<stdio.h>
 	#include<stdlib.h>
 	#include<string.h>
+	#include<ctype.h>
 	#include"y.tab.h"
 	void yyerror(char*);
+	char* toLower( char *str);
 %}
 
 digit [0-9]
@@ -43,9 +45,15 @@ whitespace [ \t]
 (for)						{return FOR;}
 (next)						{return NEXT;}
 (to)						{return TO;}
-{letter}({letter}|{digit}|".")*[#&%]? {strcpy(yylval.str,yytext);return NUM_VAR;}
-{letter}({letter}|{digit}|".")*"$"    {strcpy(yylval.str,yytext);return STR_VAR;}
+{letter}({letter}|{digit}|".")*[#&%]? {strcpy(yylval.str,toLower(yytext));return NUM_VAR;}
+{letter}({letter}|{digit}|".")*"$"    {strcpy(yylval.str,toLower(yytext));return STR_VAR;}
 .							;
 %%	
 
-
+char* toLower( char *str) {
+	int i;
+	for(i=0;str[i]!='\0';i++) {
+		str[i]=tolower(str[i]);
+	}
+	return str;
+}
