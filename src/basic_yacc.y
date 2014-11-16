@@ -15,10 +15,22 @@
 		struct intStruct* next;
 	};
 	
-	struct intStruct *labelIndexStack;
-	
+	struct intStruct *labelIndexStack;		
 	void pushLabelIndex(int label);
 	int popLabelIndex();
+		
+	struct stringStruct {
+		char label[12];
+		struct stringStruct *next;
+	};
+
+	struct stringStruct *labelList=NULL;
+	struct stringStruct *gotoList=NULL;
+	
+	struct stringStruct* insert(struct stringStruct* head, char *str);
+	struct stringStruct* find(struct stringStruct* head, char *str);
+	
+	void checkLabelValidity();
 %}
 
 %start Program
@@ -30,6 +42,7 @@
 %token <str> LT LTE GT GTE EQ NEQ
 %token IF THEN ELSE
 %token AND OR NOT
+%token <str> LABEL GOTOLABEL
 
 /*Data type tokens*/
 %token <ival> INTEGER
@@ -61,7 +74,7 @@
 %%
 
 Program
-	: Statements End {fprintf(fPtr,"end\n");}
+	: Statements End {fprintf(fPtr,"end\n"); checkLabelValidity();}
 	;
 	
 End
@@ -82,6 +95,8 @@ Statement
 	| INPUT STR_VAR				{fprintf(fPtr,"SCAN %s\n",$2);}
 	| Loop
 	| Decision
+	| LABEL						{fprintf(fPtr,"%s: ",$1);labelList=insert(labelList,$1);}
+	| GOTOLABEL					{fprintf(fPtr,"goto %s\n",$1);gotoList=insert(gotoList,$1);}
 	;
 	
 
@@ -182,6 +197,8 @@ Else
 Empty:	{};/*EPSILON*/
 BoolEmpty:	{};	
 %%
+
+
 int genTempIndex() {
 	tempCounter++;
 	return tempCounter;
@@ -191,6 +208,8 @@ int genLabelIndex() {
 	labelCounter++;
 	return labelCounter;
 }
+
+
 
 void pushLabelIndex(int label) {
 	struct intStruct* temp;
@@ -209,6 +228,51 @@ int popLabelIndex() {
 	free(temp);
 	return label;
 }
+
+
+struct stringStruct* insert(struct stringStruct* head, char *str) {
+	struct stringStruct *temp;
+	temp=(struct stringStruct*)malloc(sizeof(struct stringStruct));
+	temp->next=NULL;
+	strcpy(temp->label,str);
+	temp->next=head;
+	head=temp;
+	return head;
+}
+
+struct stringStruct* find(struct stringStruct* head, char *str) {
+	struct stringStruct *itr;	
+	itr=head;
+	while((strcmp(itr->label,str)!=0)&&(itr->next!=NULL)) {
+		itr=itr->next;
+	}
+	
+	if(strcmp(itr->label,str)==0)
+		return itr;
+	return NULL;
+}
+
+void checkLabelValidity() {
+	struct stringStruct *labelPointer, *gotoPointer;
+	
+	gotoPointer=gotoList;
+	
+	while(gotoPointer!=NULL) {
+		labelPointer=labelList;
+		while(labelPointer!=NULL) {
+			if(strcmp(gotoPointer->label,labelPointer->label)==0)
+				break;
+			labelPointer=labelPointer->next;
+		}
+		if(labelPointer==NULL) {
+			fprintf(stderr,"Error: No matching label found for the statement : goto %s\n", gotoPointer->label);
+			exit(3);
+		}
+		gotoPointer=gotoPointer->next;
+	}
+}
+
+/*Yacc default functions */
 void yyerror (char const *s) {
 	fprintf (stderr, "%s\n", s);
 }
