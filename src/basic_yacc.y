@@ -43,7 +43,7 @@
 
 /*Keywords*/
 %token PRINT END LET INPUT 
-%token DO LOOP WHILE FOR NEXT TO /*Tokens for Loops*/
+%token DO LOOP WHILE FOR NEXT TO STEP/*Tokens for Loops*/
 %token <str> LT LTE GT GTE EQ NEQ /*Tokens for Relational Operators*/
 %token IF THEN ELSE /*Tokens for Decision Statements*/
 %token AND OR NOT /*Tokens Logical Operators*/
@@ -64,7 +64,7 @@
 %type <bool> BoolEmpty
 %type <bool> LogicExpr
 %type <bool> RelExpr2
-
+%type <str> Step
 /*Operator Associativity and Precedence*/
 %left	OR
 %left	AND
@@ -193,12 +193,58 @@ LogicExpr
 
 /*LOOP CONSTRUCTS BEGIN */
 Loop
-	: DO {labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);} Statements LOOP	{labelIndex=popLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);} /*DO LOOP Construct*/
-	| DO {labelIndex=genLabelIndex();pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",labelIndex);} WHILE LogicExpr {fprintf(fPtr,"l%d: ",$4.trueIndex);} Statements LOOP {fprintf(fPtr,"goto l%d\n",popLabelIndex());fprintf(fPtr,"l%d: ",$4.falseIndex);} /*DO WHILE LOOP Construct*/
-	| FOR NUM_VAR EQ ArithmExpr TO ArithmExpr {fprintf(fPtr,"%s = %s\n",$2,$4);labelIndex=genLabelIndex();fprintf(fPtr,"l%d: ",labelIndex); pushLabelIndex(labelIndex); int beginLabel=genLabelIndex();fprintf(fPtr,"if %s <= %s goto l%d\n",$2,$6,beginLabel);labelIndex=genLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);pushLabelIndex(labelIndex);fprintf(fPtr,"l%d: ",beginLabel);} Statements  NEXT NUM_VAR 
-	{if(strcmp($2,$10)!=0){yyerror("Counter variable not used in NEXT");exit(2);}fprintf(fPtr,"%s=%s+1\n",$10,$10);int falseLabel=popLabelIndex();fprintf(fPtr,"goto l%d\n",popLabelIndex());fprintf(fPtr,"l%d: ",falseLabel);} /*FOR LOOP Construct for step size one*/
+	: DO {
+			labelIndex=genLabelIndex();
+			pushLabelIndex(labelIndex);
+			fprintf(fPtr,"l%d: ",labelIndex); /*The beginning label*/
+		} Statements LOOP	{
+			labelIndex=popLabelIndex();
+			fprintf(fPtr,"goto l%d\n",labelIndex); /*Jump to beginning label*/
+		} /*DO LOOP Construct*/
+	
+	
+	| DO {
+			labelIndex=genLabelIndex();
+			pushLabelIndex(labelIndex);
+			fprintf(fPtr,"l%d: ",labelIndex); /*The beginning label*/
+		} WHILE LogicExpr {
+			fprintf(fPtr,"l%d: ",$4.trueIndex);
+		} Statements LOOP {
+			fprintf(fPtr,"goto l%d\n",popLabelIndex()); /*Jump to beginning label*/
+			fprintf(fPtr,"l%d: ",$4.falseIndex);
+		} /*DO WHILE LOOP Construct*/
+	
+	
+	| FOR NUM_VAR EQ ArithmExpr TO ArithmExpr Step {
+			fprintf(fPtr,"%s = %s\n",$2,$4);
+			labelIndex=genLabelIndex();
+			fprintf(fPtr,"l%d: ",labelIndex); /*The beginning label*/
+			pushLabelIndex(labelIndex); 
+			int beginLabel=genLabelIndex();
+			if($7[0]=='-') /*Check for the sign of step*/
+				fprintf(fPtr,"if %s >= %s goto l%d\n",$2,$6,beginLabel);
+			else 
+				fprintf(fPtr,"if %s <= %s goto l%d\n",$2,$6,beginLabel);
+			labelIndex=genLabelIndex();
+			fprintf(fPtr,"goto l%d\n",labelIndex);
+			pushLabelIndex(labelIndex);
+			fprintf(fPtr,"l%d: ",beginLabel);
+		} Statements  NEXT NUM_VAR  {
+			if(strcmp($2,$11)!=0) {			/*IF wrong variable is used in next statement, print error*/
+				yyerror("Counter variable not used in NEXT");
+				exit(2);
+			}
+			fprintf(fPtr,"%s=%s+%s\n",$11,$11,$7);
+			int falseLabel=popLabelIndex();
+			fprintf(fPtr,"goto l%d\n",popLabelIndex()); /*Jump to beginning label of loop*/
+			fprintf(fPtr,"l%d: ",falseLabel);
+		} /*FOR LOOP Construct for step size one*/ 
 	;
 	
+Step
+	: Empty {strcpy($$,"1");}
+	| STEP ArithmExpr {strcpy($$,$2);}
+	;
 /*LOOP CONSTRUCTS END*/
 
 /*IF ELSE SECTION BEGIN*/
@@ -207,8 +253,19 @@ Decision
 	;
 	
 Else /*Else can be present or it can be empty*/
-	: {labelIndex=genLabelIndex();fprintf(fPtr,"goto l%d\n",labelIndex);pushLabelIndex(labelIndex);}ELSE {fprintf(fPtr,"l%d: ",$<bool>-1.falseIndex);} Statements {labelIndex=popLabelIndex();fprintf(fPtr,"l%d: ",labelIndex);}
-	| Empty {fprintf(fPtr,"l%d: ",$<bool>-1.falseIndex);}
+	: 	{
+			labelIndex=genLabelIndex();
+			fprintf(fPtr,"goto l%d\n",labelIndex); /*generate a label to jump after execution of true group*/
+			pushLabelIndex(labelIndex);
+	  	}ELSE {
+	  		fprintf(fPtr,"l%d: ",$<bool>-1.falseIndex); /*False label*/
+	  	} Statements {
+	  		labelIndex=popLabelIndex();
+	  		fprintf(fPtr,"l%d: ",labelIndex);
+	  	}
+	| Empty {
+			fprintf(fPtr,"l%d: ",$<bool>-1.falseIndex);
+		}
 	;
 /*IF ELSE SECTION END*/
 
