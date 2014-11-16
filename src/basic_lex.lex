@@ -59,6 +59,7 @@ goto{whitespace}+{letter}({letter}|{digit})* {char *lbl;lbl=extractGoToLabel(yyt
 %%	
 
 char* toLower( char *str) {
+/*Function to convert a string to lowercase*/
 	int i;
 	for(i=0;str[i]!='\0';i++) {
 		str[i]=tolower(str[i]);
@@ -67,6 +68,7 @@ char* toLower( char *str) {
 }
 
 char* extractLabel(char *source) {
+/*Function to remove : from the label pattern found*/
 	int i=0;
 	for(i=0;source[i]!=':';i++);
 	source[i]='\0';
@@ -74,11 +76,14 @@ char* extractLabel(char *source) {
 }
 
 char* extractGoToLabel(char *source, char* label) {
+/*Function to extract label name from goto label*/
 	int startIndex,endIndex;
 	int i,length;
+	/*ignore whitespaces and find the first character*/
 	for(i=4;(source[i]==' ')||(source[i]=='\t');i++);
 	startIndex=i;
 	
+	/*find the last character*/
 	for(;(source[i]!=' ')&&(source[i]!='\t')&&(source[i]!='\0');i++);
 	endIndex=i;
 	
