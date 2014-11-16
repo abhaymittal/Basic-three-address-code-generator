@@ -6,6 +6,8 @@
 	#include"y.tab.h"
 	void yyerror(char*);
 	char* toLower( char *str);
+	char* extractLabel(char *source);
+	char* extractGoToLabel(char *source, char* label);
 %}
 
 digit [0-9]
@@ -13,6 +15,8 @@ letter [a-zA-Z]
 whitespace [ \t]
 
 %%
+
+
 {whitespace}+ ;
 {digit}+ 					{yylval.ival = atoi(yytext);return INTEGER;}
 {digit}+"."{digit}+ 		{yylval.dval=atof(yytext);return DOUBLE;}
@@ -45,6 +49,10 @@ whitespace [ \t]
 (for)						{return FOR;}
 (next)						{return NEXT;}
 (to)						{return TO;}
+
+
+{letter}({letter}|{digit})*":" {char *lbl;lbl=extractLabel(yytext);strcpy(yylval.str,toLower(lbl));return LABEL;}
+goto{whitespace}+{letter}({letter}|{digit})* {char *lbl;lbl=extractGoToLabel(yytext,lbl);strcpy(yylval.str,toLower(lbl));return GOTOLABEL;}
 {letter}({letter}|{digit}|".")*[#&%]? {strcpy(yylval.str,toLower(yytext));return NUM_VAR;}
 {letter}({letter}|{digit}|".")*"$"    {strcpy(yylval.str,toLower(yytext));return STR_VAR;}
 .							;
@@ -56,4 +64,27 @@ char* toLower( char *str) {
 		str[i]=tolower(str[i]);
 	}
 	return str;
+}
+
+char* extractLabel(char *source) {
+	int i=0;
+	for(i=0;source[i]!=':';i++);
+	source[i]='\0';
+	return source;
+}
+
+char* extractGoToLabel(char *source, char* label) {
+	int startIndex,endIndex;
+	int i,length;
+	for(i=4;(source[i]==' ')||(source[i]=='\t');i++);
+	startIndex=i;
+	
+	for(;(source[i]!=' ')&&(source[i]!='\t')&&(source[i]!='\0');i++);
+	endIndex=i;
+	
+	length=endIndex-startIndex;
+	label=(char *)malloc(sizeof(char)*(length+1));
+	memcpy(label,source+startIndex,length);
+	label[length]='\0';
+	return label;
 }
