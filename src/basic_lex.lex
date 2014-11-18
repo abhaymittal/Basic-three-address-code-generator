@@ -49,13 +49,14 @@ whitespace [ \t]
 (for)						{return FOR;}
 (next)						{return NEXT;}
 (to)						{return TO;}
+(step)						{return STEP;}
 
-
+'[^\n]*						;
 {letter}({letter}|{digit})*":" {char *lbl;lbl=extractLabel(yytext);strcpy(yylval.str,toLower(lbl));return LABEL;}
 goto{whitespace}+{letter}({letter}|{digit})* {char *lbl;lbl=extractGoToLabel(yytext,lbl);strcpy(yylval.str,toLower(lbl));return GOTOLABEL;}
 {letter}({letter}|{digit}|".")*[#&%]? {strcpy(yylval.str,toLower(yytext));return NUM_VAR;}
 {letter}({letter}|{digit}|".")*"$"    {strcpy(yylval.str,toLower(yytext));return STR_VAR;}
-.							;
+.							{yyerror("Invalid Command");}
 %%	
 
 char* toLower( char *str) {
