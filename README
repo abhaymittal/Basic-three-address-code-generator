@@ -1,12 +1,12 @@
-#Three Address Code Generator for the BASIC programming language
+# Three Address Code Generator for the BASIC programming language
 
-##Introduction
+## Introduction
 I created this code as a part of my coursework assignment in compiler design to learn the concepts of lex and yacc. It takes a basic program as an input and generates a three address intermediate code as the output. 
 
 - The doc folder contains a latex file. It consists of some commands in basic.
 - The src folder consists of the lex file containing the patterns for the tokens and the yacc file containing the grammar
 
-##Features
+## Features
 It supports the following commands
 
 - PRINT
